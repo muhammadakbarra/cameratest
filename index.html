@@ -1,67 +1,86 @@
 <!DOCTYPE html>
 <html lang="id">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Webcam Access</title>
-    </head>
-    <body>
-        <div>
-            <video autoplay="true" id="video-webcam">
-                Browsermu tidak mendukung bro, upgrade donk!
-            </video>
-        </div>
-        <button onclick="takeSnapshot()">Ambil Gambar</button>
-        <script type="text/javascript">
-            // Seleksi elemen video
-            var video = document.querySelector('#video-webcam');
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webcam Access with Webcam Easy</title>
+    <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: white;
+        }
+        video {
+            width: 640px;
+            height: 480px;
+            border: 1px solid #fff;
+        }
+        canvas {
+            display: none;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #61dafb;
+            color: #282c34;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Webcam Access Demo</h1>
+    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" class="d-none"></canvas>
+    <audio id="snapSound" src="https://www.soundjay.com/button/sounds/camera-click-01.mp3" preload="auto"></audio>
+    <button id="start">Mulai Webcam</button>
+    <button id="snap">Ambil Gambar</button>
+    <button id="toggleCamera">Ganti Kamera</button>
 
-            // Minta izin user
-            navigator.getUserMedia =
-                navigator.getUserMedia ||
-                navigator.webkitGetUserMedia ||
-                navigator.mozGetUserMedia ||
-                navigator.msGetUserMedia ||
-                navigator.oGetUserMedia;
+    <script type="text/javascript">
+        const webcamElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('canvas');
+        const snapSoundElement = document.getElementById('snapSound');
+        const webcam = new Webcam(webcamElement, 'user', canvasElement, snapSoundElement);
+        
+        let facingMode = 'user'; // Mode kamera awal
+        
+        // Mulai webcam saat tombol diklik
+        document.getElementById('start').addEventListener('click', () => {
+            webcam.start()
+                .then(result => {
+                    console.log("webcam started");
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        });
 
-            // Jika user memberikan izin
-            if (navigator.getUserMedia) {
-                // Jalankan fungsi handleVideo, dan videoError jika izin ditolak
-                navigator.getUserMedia(
-                    { video: true },
-                    handleVideo,
-                    videoError
-                );
-            }
-
-            // Fungsi ini dieksekusi jika izin telah diberikan
-            function handleVideo(stream) {
-                video.srcObject = stream;
-            }
-
-            // Fungsi ini dieksekusi kalau user menolak izin
-            function videoError(e) {
-                alert('Izinkan menggunakan webcam untuk demo!');
-            }
-
-            // Fungsi untuk mengambil gambar
-            function takeSnapshot() {
-                var img = document.createElement('img');
-                var context;
-
-                var width = video.offsetWidth,
-                    height = video.offsetHeight;
-
-                var canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
-                context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, width, height);
-
-                img.src = canvas.toDataURL('image/png');
+        // Ambil gambar saat tombol diklik
+        document.getElementById('snap').addEventListener('click', () => {
+            const picture = webcam.snap();
+            console.log(picture); // Tampilkan URL gambar di konsol
+            if (picture) {
+                // Tampilkan gambar di halaman (bisa ditambahkan ke elemen img)
+                const img = document.createElement('img');
+                img.src = picture;
+                img.alt = "Captured Image";
                 document.body.appendChild(img);
             }
-        </script>
-    </body>
+        });
+
+        // Ganti kamera (depan/belakang) saat tombol diklik
+        document.getElementById('toggleCamera').addEventListener('click', () => {
+            facingMode = facingMode === 'user' ? 'environment' : 'user'; // Toggle antara kamera
+            webcam.flip(); // Ganti arah kamera
+        });
+    </script>
+</body>
 </html>
