@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Webcam Access</title>
+    </head>
+    <body>
+        <div>
+            <video autoplay="true" id="video-webcam">
+                Browsermu tidak mendukung bro, upgrade donk!
+            </video>
+        </div>
+        <button onclick="takeSnapshot()">Ambil Gambar</button>
+        <script type="text/javascript">
+            // Seleksi elemen video
+            var video = document.querySelector('#video-webcam');
+
+            // Minta izin user
+            navigator.getUserMedia =
+                navigator.getUserMedia ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia ||
+                navigator.oGetUserMedia;
+
+            // Jika user memberikan izin
+            if (navigator.getUserMedia) {
+                // Jalankan fungsi handleVideo, dan videoError jika izin ditolak
+                navigator.getUserMedia(
+                    { video: true },
+                    handleVideo,
+                    videoError
+                );
+            }
+
+            // Fungsi ini dieksekusi jika izin telah diberikan
+            function handleVideo(stream) {
+                video.srcObject = stream;
+            }
+
+            // Fungsi ini dieksekusi kalau user menolak izin
+            function videoError(e) {
+                alert('Izinkan menggunakan webcam untuk demo!');
+            }
+
+            // Fungsi untuk mengambil gambar
+            function takeSnapshot() {
+                var img = document.createElement('img');
+                var context;
+
+                var width = video.offsetWidth,
+                    height = video.offsetHeight;
+
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, width, height);
+
+                img.src = canvas.toDataURL('image/png');
+                document.body.appendChild(img);
+            }
+        </script>
+    </body>
+</html>
